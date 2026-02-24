@@ -1,0 +1,7 @@
+pandas
+pyarrow
+fastparquet
+sentence-transformers
+faiss-cpu
+datasets
+pytest
