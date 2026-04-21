@@ -5,3 +5,8 @@ sentence-transformers
 faiss-cpu
 datasets
 pytest
+transformers
+torch
+huggingface-hub
+tqdm
+numpy
