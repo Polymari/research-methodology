@@ -69,34 +69,36 @@ def calculate_recall_at_k(retrieved_indices, ground_truth_indices, k=10):
     return np.mean(recalls)
 
 
-def evaluate_paper_level(retrieved_indices, ground_truth_paper_ids, corpus_paper_ids, k_values=[1, 10, 20]):
+def evaluate_paper_level(
+    retrieved_indices, ground_truth_paper_ids, corpus_paper_ids, k_values=[1, 10, 20]
+):
     """
     Paper-level evaluation: map retrieved theorem indices to paper IDs,
     then compute metrics based on whether the correct paper was found.
-    
+
     Args:
         retrieved_indices: List of arrays, each containing the top-k retrieved corpus indices per query.
         ground_truth_paper_ids: List of target paper_id strings, one per query.
         corpus_paper_ids: Array/list of paper_id for each theorem in the corpus (indexed same as corpus).
         k_values: List of k values to compute metrics for.
-    
+
     Returns:
         dict with paper-level P@k, Hit@k, MRR@k for each k.
     """
     results = {}
-    
+
     for k in k_values:
         hits = []
         precisions = []
         mrrs = []
-        
+
         for retrieved, gt_paper_id in zip(retrieved_indices, ground_truth_paper_ids):
             if not gt_paper_id:
                 hits.append(0.0)
                 precisions.append(0.0)
                 mrrs.append(0.0)
                 continue
-            
+
             retrieved_k = retrieved[:k]
             # Map retrieved theorem indices to paper IDs
             retrieved_papers = []
@@ -105,24 +107,24 @@ def evaluate_paper_level(retrieved_indices, ground_truth_paper_ids, corpus_paper
                     retrieved_papers.append(str(corpus_paper_ids[idx]))
                 else:
                     retrieved_papers.append("")
-            
+
             # Check if any retrieved paper matches the ground truth
             paper_hits = [1 if p and gt_paper_id in p else 0 for p in retrieved_papers]
-            
+
             hits.append(1.0 if any(paper_hits) else 0.0)
             precisions.append(sum(paper_hits) / k if k > 0 else 0.0)
-            
+
             mrr = 0.0
             for rank, h in enumerate(paper_hits):
                 if h:
                     mrr = 1.0 / (rank + 1)
                     break
             mrrs.append(mrr)
-        
+
         results[f"P@{k}"] = np.mean(precisions)
         results[f"Hit@{k}"] = np.mean(hits)
         results[f"MRR@{k}"] = np.mean(mrrs)
-    
+
     return results
 
 
@@ -130,10 +132,10 @@ def print_results_table(theorem_metrics, paper_metrics=None, model_name="Model")
     """
     Print results in a format matching the paper's Table 2.
     """
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  Results for: {model_name}")
-    print(f"{'='*60}")
-    
+    print(f"{'=' * 60}")
+
     header = f"{'Metric':<12}"
     if paper_metrics:
         header += f"{'Theorem-Level':>16} {'Paper-Level':>16}"
@@ -141,12 +143,12 @@ def print_results_table(theorem_metrics, paper_metrics=None, model_name="Model")
         header += f"{'Value':>16}"
     print(header)
     print("-" * 60)
-    
+
     for metric_name, value in theorem_metrics.items():
         row = f"{metric_name:<12}"
         row += f"{value:>16.3f}"
         if paper_metrics and metric_name in paper_metrics:
             row += f"{paper_metrics[metric_name]:>16.3f}"
         print(row)
-    
-    print(f"{'='*60}")
+
+    print(f"{'=' * 60}")

@@ -1,4 +1,3 @@
-import pytest
 import pandas as pd
 from unittest.mock import patch, MagicMock
 
@@ -15,7 +14,9 @@ def test_load_theorems(mock_load_dataset):
 
     df = load_theorems()
 
-    mock_load_dataset.assert_called_once_with("uw-math-ai/theorem-search-dataset", "theorem")
+    mock_load_dataset.assert_called_once_with(
+        "uw-math-ai/theorem-search-dataset", "theorem"
+    )
     assert len(df) == 2
     assert "theorem_id" in df.columns
 
@@ -32,7 +33,9 @@ def test_load_slogans(mock_load_dataset):
 
     df = load_slogans()
 
-    mock_load_dataset.assert_called_once_with("uw-math-ai/theorem-search-dataset", "theorem_slogan")
+    mock_load_dataset.assert_called_once_with(
+        "uw-math-ai/theorem-search-dataset", "theorem_slogan"
+    )
     assert len(df) == 2
     assert "slogan" in df.columns
 
@@ -53,24 +56,28 @@ def test_load_test_queries_with_ground_truth():
     from src.data_loader import load_test_queries_with_ground_truth
 
     # Mock theorem corpus
-    df_theorems = pd.DataFrame({
-        "theorem_id": [100, 101, 102, 200],
-        "paper_id": ["2310.15076", "2310.15076", "2310.15076", "9999.99999"],
-        "name": ["Theorem 3.1", "Lemma 3.8", "Theorem 1.1", "Theorem 1.1"],
-        "body": ["body1", "body2", "body3", "body4"],
-    })
+    df_theorems = pd.DataFrame(
+        {
+            "theorem_id": [100, 101, 102, 200],
+            "paper_id": ["2310.15076", "2310.15076", "2310.15076", "9999.99999"],
+            "name": ["Theorem 3.1", "Lemma 3.8", "Theorem 1.1", "Theorem 1.1"],
+            "body": ["body1", "body2", "body3", "body4"],
+        }
+    )
 
     # Patch load_test_queries to return test data
-    mock_test = pd.DataFrame({
-        "query": ["find theorem A", "find lemma B", "missing paper query"],
-        "theorem number": ["Theorem 3.1", "Lemma 3.8", "Theorem 5.5"],
-        "paper title": ["Paper A", "Paper A", "Paper C"],
-        "link to paper on arxiv": [
-            "https://arxiv.org/abs/2310.15076",
-            "https://arxiv.org/abs/2310.15076",
-            "https://arxiv.org/abs/0000.00000",
-        ],
-    })
+    mock_test = pd.DataFrame(
+        {
+            "query": ["find theorem A", "find lemma B", "missing paper query"],
+            "theorem number": ["Theorem 3.1", "Lemma 3.8", "Theorem 5.5"],
+            "paper title": ["Paper A", "Paper A", "Paper C"],
+            "link to paper on arxiv": [
+                "https://arxiv.org/abs/2310.15076",
+                "https://arxiv.org/abs/2310.15076",
+                "https://arxiv.org/abs/0000.00000",
+            ],
+        }
+    )
 
     with patch("src.data_loader.load_test_queries", return_value=mock_test):
         results = load_test_queries_with_ground_truth(df_theorems)

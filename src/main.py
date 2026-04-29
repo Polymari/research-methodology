@@ -12,13 +12,11 @@ import sys
 import os
 
 import pandas as pd
-import numpy as np
 
 # Allow imports from src/ when running as `python src/main.py`
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from data_loader import (
-    load_corpus,
     load_theorems,
     load_slogans,
     load_test_queries_with_ground_truth,
@@ -202,7 +200,7 @@ def run_benchmark(
     distances, retrieved_indices = retriever.search(query_embeddings, top_k=20)
     t2 = time.time()
 
-    print(f"  Query embed: {t1-t0:.2f}s | Search: {t2-t1:.2f}s")
+    print(f"  Query embed: {t1 - t0:.2f}s | Search: {t2 - t1:.2f}s")
 
     # =========================================================================
     # 5. Evaluate
@@ -226,7 +224,12 @@ def run_benchmark(
         retrieved_eval, paper_gt_ids_evaluable, corpus_paper_ids, k_values=[1, 10, 20]
     )
 
-    theorem_metrics_eval = {"P@1": t_p1, "Hit@10": t_h10, "Hit@20": t_h20, "MRR@20": t_mrr}
+    theorem_metrics_eval = {
+        "P@1": t_p1,
+        "Hit@10": t_h10,
+        "Hit@20": t_h20,
+        "MRR@20": t_mrr,
+    }
 
     # --- Full metrics (all 110 queries, missing ground truth = miss) ---
     t_p1_f = calculate_precision_at_k(retrieved_indices, theorem_gt_indices_full, k=1)
@@ -238,26 +241,29 @@ def run_benchmark(
         retrieved_indices, paper_gt_ids_full, corpus_paper_ids, k_values=[1, 10, 20]
     )
 
-    theorem_metrics_full = {"P@1": t_p1_f, "Hit@10": t_h10_f, "Hit@20": t_h20_f, "MRR@20": t_mrr_f}
+    theorem_metrics_full = {
+        "P@1": t_p1_f,
+        "Hit@10": t_h10_f,
+        "Hit@20": t_h20_f,
+        "MRR@20": t_mrr_f,
+    }
 
     # --- Print results ---
     mode = "slogans" if use_slogans else "LaTeX bodies"
     model_short = model_name.split("/")[-1]
 
-    print(f"\n{'='*72}")
+    print(f"\n{'=' * 72}")
     print(f"  EVALUABLE-ONLY ({n_evaluable} queries with ground truth in corpus)")
-    print(f"{'='*72}")
+    print(f"{'=' * 72}")
     print_results_table(
-        theorem_metrics_eval, p_metrics_eval,
-        model_name=f"{model_short} ({mode})"
+        theorem_metrics_eval, p_metrics_eval, model_name=f"{model_short} ({mode})"
     )
 
-    print(f"\n{'='*72}")
+    print(f"\n{'=' * 72}")
     print(f"  FULL EVALUATION ({n_total} queries, missing ground truth = miss)")
-    print(f"{'='*72}")
+    print(f"{'=' * 72}")
     print_results_table(
-        theorem_metrics_full, p_metrics_full,
-        model_name=f"{model_short} ({mode})"
+        theorem_metrics_full, p_metrics_full, model_name=f"{model_short} ({mode})"
     )
 
     return {
@@ -271,24 +277,29 @@ def run_benchmark(
 def main():
     parser = argparse.ArgumentParser(description="Semantic Theorem Search Benchmark")
     parser.add_argument(
-        "--sample-size", type=int, default=0,
-        help="Corpus size (0=all ~1.34M, >0 = sample N theorems)"
+        "--sample-size",
+        type=int,
+        default=0,
+        help="Corpus size (0=all ~1.34M, >0 = sample N theorems)",
     )
     parser.add_argument(
-        "--model", type=str, default="Qwen/Qwen3-Embedding-0.6B",
-        help="Embedding model name"
+        "--model",
+        type=str,
+        default="Qwen/Qwen3-Embedding-0.6B",
+        help="Embedding model name",
     )
     parser.add_argument(
-        "--no-slogans", action="store_true",
-        help="Embed raw LaTeX bodies instead of slogans (ablation)"
+        "--no-slogans",
+        action="store_true",
+        help="Embed raw LaTeX bodies instead of slogans (ablation)",
     )
     parser.add_argument(
-        "--hnsw", action="store_true",
-        help="Use HNSW approximate index (faster for large corpora)"
+        "--hnsw",
+        action="store_true",
+        help="Use HNSW approximate index (faster for large corpora)",
     )
     parser.add_argument(
-        "--batch-size", type=int, default=32,
-        help="Embedding batch size"
+        "--batch-size", type=int, default=32, help="Embedding batch size"
     )
 
     args = parser.parse_args()

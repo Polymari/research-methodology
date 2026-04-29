@@ -1,4 +1,0 @@
-Config name is missing.
-Please pick one among the available configs: ['theorem', 'theorem_slogan', 'paper', 'theorem-test']
-Example of usage:
-	`load_dataset('uw-math-ai/theorem-search-dataset', 'theorem')`
